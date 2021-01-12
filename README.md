@@ -16,6 +16,22 @@ Inputs:
 - function_name (required)
 - number_to_keep (required - keeps `number_to_keep` most recent versions not associated with an alias)
 
+Usage:
+
+```yml
+  name: delete-lambda-versions
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Test
+        uses: kjs222/clean-old-lambda-versions-action@v0.1
+        with:
+          function_name: '<your-lambda-function-name>'
+          number_to_keep: 2
+```
+
 ## Contributing:
 
 Install the dependencies
