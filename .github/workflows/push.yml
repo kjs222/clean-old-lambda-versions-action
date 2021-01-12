@@ -1,0 +1,18 @@
+on: [push]
+
+jobs:
+  test_local:
+    runs-on: ubuntu-latest
+    name: test-local
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Test
+        uses: ./
+        with:
+          function_name: 'gh-action-test-lambda'
+          number_to_keep: 3

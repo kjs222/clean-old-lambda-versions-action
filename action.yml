@@ -1,0 +1,13 @@
+name: 'Clean Lambda Versions'
+description: 'Deletes older lambda versions'
+author: 'Kerry Sheldon'
+inputs:
+  function_name:
+    required: true
+    description: 'name of lambda function to clean'
+  number_to_keep:
+    required: true
+    description: 'number of versions to maintain'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
