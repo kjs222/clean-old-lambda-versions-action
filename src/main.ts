@@ -35,8 +35,7 @@ async function listVersions(
   marker: string | undefined
 ): Promise<Lambda.ListVersionsByFunctionResponse> {
   const params: Lambda.ListVersionsByFunctionRequest = {
-    FunctionName: functionName,
-    MaxItems: 2 // just for testing
+    FunctionName: functionName
   }
   if (marker) {
     params.Marker = marker
@@ -108,13 +107,12 @@ async function run(): Promise<void> {
       removableVersions.length - numberToKeep
     )
 
-    core.info(`preparing to remove ${versionsToRemove.length} versions`)
+    core.info(`preparing to remove ${versionsToRemove.length} version(s)`)
 
     const removePromises = versionsToRemove.map(v =>
       deleteVersion(functionName, v)
     )
     await Promise.all(removePromises)
-    core.debug('finished removing versions')
   } catch (error) {
     core.setFailed(error.message)
   }
