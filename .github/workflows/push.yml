@@ -15,4 +15,4 @@ jobs:
         uses: ./
         with:
           function_name: 'gh-action-test-lambda'
-          number_to_keep: 3
+          number_to_keep: 2

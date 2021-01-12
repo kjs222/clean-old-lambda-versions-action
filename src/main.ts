@@ -57,17 +57,12 @@ async function listAllVersions(functionName: string): Promise<string[]> {
     if (!result.NextMarker) {
       hasMoreVersions = false
     } else {
-      core.debug('got a marker')
       marker = result.NextMarker
     }
     if (result.Versions) {
       versions = [...versions, ...result.Versions]
     }
-    core.debug(versions.map(v => v.Version).join(','))
   }
-  core.debug('got all the versions, lets see the original order')
-
-  core.debug(versions.map(v => v.LastModified).join(','))
 
   const sorted = versions.sort((a, b) => {
     let aLastModified = new Date()
@@ -80,10 +75,6 @@ async function listAllVersions(functionName: string): Promise<string[]> {
     }
     return aLastModified.getTime() - bLastModified.getTime()
   })
-  core.debug('got em sorted, lets see it')
-
-  core.debug(sorted.map(v => v.Version).join(','))
-  core.debug(versions.map(v => v.LastModified).join(','))
 
   const sortedVersionNumbers = sorted.map(v => v.Version)
   return sortedVersionNumbers.filter(v => v !== undefined) as string[]
@@ -99,6 +90,18 @@ async function run(): Promise<void> {
       core.debug(aliasVersions.join(','))
       const allVersions = await listAllVersions(core.getInput('function_name'))
       core.debug(allVersions.join(','))
+
+      const removableVersions = allVersions.filter(
+        v => !aliasVersions.includes(v) || v !== '$LATEST'
+      )
+      core.debug(removableVersions.join(','))
+
+      const versionsToRemove = removableVersions.slice(
+        0,
+        removableVersions.length - parseInt(core.getInput('number_to_keep'))
+      )
+
+      core.debug(versionsToRemove.join(','))
     }
     // if (core.getInput('number_to_keep')) {
     //   core.debug(core.getInput('number_to_keep'))
