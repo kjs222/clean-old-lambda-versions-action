@@ -83,7 +83,6 @@ async function listAllVersions(functionName: string): Promise<string[]> {
 async function run(): Promise<void> {
   try {
     if (core.getInput('function_name')) {
-      core.debug(core.getInput('function_name'))
       const aliasVersions = await getAliasVersions(
         core.getInput('function_name')
       )
@@ -91,9 +90,12 @@ async function run(): Promise<void> {
       const allVersions = await listAllVersions(core.getInput('function_name'))
       core.debug(allVersions.join(','))
 
-      const removableVersions = allVersions.filter(
-        v => !aliasVersions.includes(v) || v !== '$LATEST'
-      )
+      const removableVersions = allVersions.filter(v => {
+        core.debug(v)
+        core.debug(aliasVersions.includes(v).toString())
+        return !aliasVersions.includes(v) || v !== '$LATEST'
+      })
+      core.debug('removables')
       core.debug(removableVersions.join(','))
 
       const versionsToRemove = removableVersions.slice(
