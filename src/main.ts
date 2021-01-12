@@ -80,6 +80,14 @@ async function listAllVersions(functionName: string): Promise<string[]> {
   return sortedVersionNumbers.filter(v => v !== undefined) as string[]
 }
 
+async function deleteVersion(
+  functionName: string,
+  versionNumber: string
+): Promise<void> {
+  core.info(`Deleting version ${versionNumber} from ${functionName}`)
+  lambda.deleteFunction({FunctionName: functionName, Qualifier: versionNumber})
+}
+
 async function run(): Promise<void> {
   try {
     if (core.getInput('function_name')) {
@@ -91,11 +99,8 @@ async function run(): Promise<void> {
       core.debug(allVersions.join(','))
 
       const removableVersions = allVersions.filter(v => {
-        core.debug(v)
-        core.debug(aliasVersions.includes(v).toString())
-        return !aliasVersions.includes(v) || v !== '$LATEST'
+        return !aliasVersions.includes(v) && v !== '$LATEST'
       })
-      core.debug('removables')
       core.debug(removableVersions.join(','))
 
       const versionsToRemove = removableVersions.slice(
@@ -104,6 +109,10 @@ async function run(): Promise<void> {
       )
 
       core.debug(versionsToRemove.join(','))
+      const removePromises = versionsToRemove.map(v =>
+        deleteVersion(core.getInput('function_name'), v)
+      )
+      await Promise.all(removePromises)
     }
     // if (core.getInput('number_to_keep')) {
     //   core.debug(core.getInput('number_to_keep'))
