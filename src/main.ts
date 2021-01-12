@@ -92,34 +92,29 @@ async function deleteVersion(
 
 async function run(): Promise<void> {
   try {
-    if (core.getInput('function_name')) {
-      const aliasVersions = await getAliasVersions(
-        core.getInput('function_name')
-      )
-      core.debug(aliasVersions.join(','))
-      const allVersions = await listAllVersions(core.getInput('function_name'))
-      core.debug(allVersions.join(','))
-
-      const removableVersions = allVersions.filter(v => {
-        return !aliasVersions.includes(v) && v !== '$LATEST'
-      })
-      core.debug(removableVersions.join(','))
-
-      const versionsToRemove = removableVersions.slice(
-        0,
-        removableVersions.length - parseInt(core.getInput('number_to_keep'))
-      )
-
-      core.debug(versionsToRemove.join(','))
-      const removePromises = versionsToRemove.map(v =>
-        deleteVersion(core.getInput('function_name'), v)
-      )
-      await Promise.all(removePromises)
-      core.info('finished')
+    const functionName = core.getInput('function_name')
+    const numberToKeep = parseInt(core.getInput('number_to_keep'))
+    if (isNaN(numberToKeep)) {
+      throw new Error('number_to_keep must be a number')
     }
-    // if (core.getInput('number_to_keep')) {
-    //   core.debug(core.getInput('number_to_keep'))
-    // }
+    const aliasVersions = await getAliasVersions(functionName)
+    const allVersions = await listAllVersions(functionName)
+
+    const removableVersions = allVersions.filter(v => {
+      return !aliasVersions.includes(v) && v !== '$LATEST'
+    })
+    const versionsToRemove = removableVersions.slice(
+      0,
+      removableVersions.length - numberToKeep
+    )
+
+    core.info(`preparing to remove ${versionsToRemove.length} versions`)
+
+    const removePromises = versionsToRemove.map(v =>
+      deleteVersion(functionName, v)
+    )
+    await Promise.all(removePromises)
+    core.debug('finished removing versions')
   } catch (error) {
     core.setFailed(error.message)
   }
