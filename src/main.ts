@@ -85,7 +85,9 @@ async function deleteVersion(
   versionNumber: string
 ): Promise<void> {
   core.info(`Deleting version ${versionNumber} from ${functionName}`)
-  lambda.deleteFunction({FunctionName: functionName, Qualifier: versionNumber})
+  lambda
+    .deleteFunction({FunctionName: functionName, Qualifier: versionNumber})
+    .promise()
 }
 
 async function run(): Promise<void> {
@@ -113,6 +115,7 @@ async function run(): Promise<void> {
         deleteVersion(core.getInput('function_name'), v)
       )
       await Promise.all(removePromises)
+      core.info('finished')
     }
     // if (core.getInput('number_to_keep')) {
     //   core.debug(core.getInput('number_to_keep'))
