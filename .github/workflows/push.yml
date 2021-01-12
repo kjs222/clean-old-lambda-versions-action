@@ -16,7 +16,9 @@ jobs:
         with:
           function_name: 'gh-action-test-lambda'
           number_to_keep: 2
-  name: test-published
+  test-published:
+    runs-on: ubuntu-latest
+    name: test-published
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
