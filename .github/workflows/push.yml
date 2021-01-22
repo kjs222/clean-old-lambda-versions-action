@@ -16,16 +16,3 @@ jobs:
         with:
           function_name: 'gh-action-test-lambda'
           number_to_keep: 2
-  test-published:
-    runs-on: ubuntu-latest
-    name: test-published
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-    steps:
-      - name: Test
-        uses: kjs222/clean-old-lambda-versions-action@v0.1
-        with:
-          function_name: 'gh-action-test-lambda'
-          number_to_keep: 2
