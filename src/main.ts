@@ -5,7 +5,7 @@ const lambda = new Lambda({
   apiVersion: '2015-03-31'
 })
 
-async function getAliasVersions(functionName: string): Promise<string[]> {
+async function getAliasedVersions(functionName: string): Promise<string[]> {
   const response = await lambda
     .listAliases({FunctionName: functionName})
     .promise()
@@ -64,14 +64,8 @@ async function listAllVersions(functionName: string): Promise<string[]> {
   }
 
   const sorted = versions.sort((a, b) => {
-    let aLastModified = new Date()
-    let bLastModified = new Date()
-    if (a.LastModified) {
-      aLastModified = new Date(a.LastModified)
-    }
-    if (b.LastModified) {
-      bLastModified = new Date(b.LastModified)
-    }
+    const aLastModified = a.LastModified ? new Date(a.LastModified) : new Date()
+    const bLastModified = b.LastModified ? new Date(b.LastModified) : new Date()
     return aLastModified.getTime() - bLastModified.getTime()
   })
 
@@ -82,9 +76,9 @@ async function listAllVersions(functionName: string): Promise<string[]> {
 async function deleteVersion(
   functionName: string,
   versionNumber: string
-): Promise<void> {
+): Promise<any> {
   core.info(`Deleting version ${versionNumber} from ${functionName}`)
-  lambda
+  return lambda
     .deleteFunction({FunctionName: functionName, Qualifier: versionNumber})
     .promise()
 }
@@ -96,11 +90,11 @@ async function run(): Promise<void> {
     if (isNaN(numberToKeep)) {
       throw new Error('number_to_keep must be a number')
     }
-    const aliasVersions = await getAliasVersions(functionName)
+    const aliasedVersions = await getAliasedVersions(functionName)
     const allVersions = await listAllVersions(functionName)
 
     const removableVersions = allVersions.filter(v => {
-      return !aliasVersions.includes(v) && v !== '$LATEST'
+      return !aliasedVersions.includes(v) && v !== '$LATEST'
     })
     const versionsToRemove = removableVersions.slice(
       0,
@@ -109,10 +103,10 @@ async function run(): Promise<void> {
 
     core.info(`preparing to remove ${versionsToRemove.length} version(s)`)
 
-    const removePromises = versionsToRemove.map(v =>
+    const deleteVersions = versionsToRemove.map(v =>
       deleteVersion(functionName, v)
     )
-    await Promise.all(removePromises)
+    await Promise.all(deleteVersions)
   } catch (error) {
     core.setFailed(error.message)
   }

@@ -26,7 +26,7 @@ Usage:
       AWS_REGION: ${{ secrets.AWS_REGION }}
     steps:
       - name: Test
-        uses: kjs222/clean-old-lambda-versions-action@v0.1
+        uses: kjs222/clean-old-lambda-versions-action@v0.2
         with:
           function_name: '<your-lambda-function-name>'
           number_to_keep: 2
