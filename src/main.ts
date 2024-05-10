@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import AWS, {Lambda} from 'aws-sdk'
+import {Lambda} from 'aws-sdk'
 
 const lambda = new Lambda({
   apiVersion: '2015-03-31'
@@ -13,7 +13,7 @@ async function getAliasedVersions(functionName: string): Promise<string[]> {
   let versions: string[] = []
 
   if (response.Aliases) {
-    response.Aliases.forEach(a => {
+    for (const a of response.Aliases) {
       if (a.FunctionVersion) {
         versions.push(a.FunctionVersion)
       }
@@ -25,7 +25,7 @@ async function getAliasedVersions(functionName: string): Promise<string[]> {
         core.debug(additionalVersions.join(','))
         versions = [...versions, ...additionalVersions]
       }
-    })
+    }
   }
   return versions
 }
@@ -76,7 +76,7 @@ async function listAllVersions(functionName: string): Promise<string[]> {
 async function deleteVersion(
   functionName: string,
   versionNumber: string
-): Promise<any> {
+): Promise<Promise<unknown>> {
   core.info(`Deleting version ${versionNumber} from ${functionName}`)
   return lambda
     .deleteFunction({FunctionName: functionName, Qualifier: versionNumber})
@@ -103,12 +103,14 @@ async function run(): Promise<void> {
 
     core.info(`preparing to remove ${versionsToRemove.length} version(s)`)
 
-    const deleteVersions = versionsToRemove.map(v =>
+    const deleteVersions = versionsToRemove.map(async v =>
       deleteVersion(functionName, v)
     )
+
     await Promise.all(deleteVersions)
   } catch (error) {
-    core.setFailed(error.message)
+    const e = error as Error
+    core.setFailed(e.message)
   }
 }
 
